@@ -1,6 +1,6 @@
 /* Target-dependent code for BPF.
 
-   Copyright (C) 2020-2021 Free Software Foundation, Inc.
+   Copyright (C) 2020-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,6 +34,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 #include "remote.h"
+#include "gdbarch.h"
 
 
 /* eBPF registers.  */
@@ -57,7 +58,7 @@ enum bpf_regnum
 #define BPF_NUM_REGS	(BPF_PC_REGNUM + 1)
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct bpf_gdbarch_tdep : gdbarch_tdep
 {
 };
 
@@ -75,7 +76,7 @@ static void
 show_bpf_debug (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of BPF is %s.\n"), value);
+  gdb_printf (file, _("Debugging of BPF is %s.\n"), value);
 }
 
 
@@ -103,9 +104,9 @@ static struct type *
 bpf_register_type (struct gdbarch *gdbarch, int reg)
 {
   if (reg == BPF_R10_REGNUM)
-    return builtin_type (gdbarch)->builtin_data_ptr;
+    return builtin_type (gdbarch)->builtin_uint64;
   else if (reg == BPF_PC_REGNUM)
-    return builtin_type (gdbarch)->builtin_func_ptr;
+    return builtin_type (gdbarch)->builtin_uint64;
   return builtin_type (gdbarch)->builtin_int64;
 }
 
@@ -135,9 +136,9 @@ bpf_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 static CORE_ADDR
 bpf_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  fprintf_unfiltered (gdb_stdlog,
-		      "Skipping prologue: start_pc=%s\n",
-		      paddress (gdbarch, start_pc));
+  gdb_printf (gdb_stdlog,
+	      "Skipping prologue: start_pc=%s\n",
+	      paddress (gdbarch, start_pc));
   /* XXX: to be completed.  */
   return start_pc + 0;
 }
@@ -184,6 +185,7 @@ bpf_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind bpf_frame_unwind =
 {
+  "bpf prologue",
   NORMAL_FRAME,
   bpf_frame_unwind_stop_reason,
   bpf_frame_this_id,
@@ -250,8 +252,8 @@ bpf_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
-  fprintf_unfiltered (gdb_stdlog, "Pushing dummy call: sp=%s\n",
-		      paddress (gdbarch, sp));
+  gdb_printf (gdb_stdlog, "Pushing dummy call: sp=%s\n",
+	      paddress (gdbarch, sp));
   /* XXX writeme  */
   return sp;
 }
@@ -320,7 +322,7 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
+  bpf_gdbarch_tdep *tdep = new bpf_gdbarch_tdep;
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Information about registers, etc.  */
@@ -358,6 +360,9 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Disassembly.  */
   set_gdbarch_print_insn (gdbarch, bpf_gdb_print_insn);
+
+  set_gdbarch_addr_bit (gdbarch, 64);
+  set_gdbarch_ptr_bit (gdbarch, 64);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
