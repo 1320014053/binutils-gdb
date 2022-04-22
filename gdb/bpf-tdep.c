@@ -103,9 +103,9 @@ static struct type *
 bpf_register_type (struct gdbarch *gdbarch, int reg)
 {
   if (reg == BPF_R10_REGNUM)
-    return builtin_type (gdbarch)->builtin_uint64;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else if (reg == BPF_PC_REGNUM)
-    return builtin_type (gdbarch)->builtin_uint64;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   return builtin_type (gdbarch)->builtin_int64;
 }
 
@@ -365,7 +365,6 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Install unwinders.  */
   frame_unwind_append_unwinder (gdbarch, &bpf_frame_unwind);
 
-  set_gdbarch_addr_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
 
   return gdbarch;
