@@ -29,25 +29,22 @@ jobs:
 
 
 
-      - name: Space cleanup
+      - name: Build
         run: |
-          pwd
-          ls
           git clone https://github.com/1320014053/binutils-gdb.git
           cd binutils-gdb
           ./configure bpf
           make -j2
       
-      - name: build
+      - name: Copy
         run: |
-          pwd
           mkdir -p ./artifact/bin
           cp binutils-gdb/gdb/gdb ./artifact/bin
           
       - name: Deliver buildinfo
         uses: actions/upload-artifact@v2
         with:
-          name: OpenWrt_buildinfo
+          name: Output
           path: ./artifact/bin/
 
       
