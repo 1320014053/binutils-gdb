@@ -1,0 +1,54 @@
+# 
+# <https://github.com/KFERMercer/OpenWrt-CI>
+#
+# Copyright (C) 2019 P3TERX
+#
+# Copyright (C) 2020 KFERMercer
+#
+name: GDB
+
+on:
+  schedule:
+    - cron: 0 20 * * *
+  release:
+    types: [published]
+    
+permissions:
+  contents: read
+
+jobs:
+
+  build_openwrt:
+
+    permissions:
+      contents: write # for release creation
+
+    name: Build OpenWrt firmware
+
+    runs-on: ubuntu-latest
+
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+
+
+
+      - name: Space cleanup
+        run: |
+          git clone https://github.com/1320014053/binutils-gdb.git
+          cd binutils-gdb
+          ./configure bpf
+          make -j2
+      
+      - name: Prepare artifact
+        run: |
+          mkdir -p ./artifact/bin
+          cp /gdb/gdb ./artifact/bin
+          
+      - name: Deliver buildinfo
+        uses: actions/upload-artifact@v2
+        with:
+          name: OpenWrt_buildinfo
+          path: ./artifact/bin/
+
+      
