@@ -40,7 +40,7 @@ jobs:
         run: |
           pwd
           mkdir -p ./artifact/bin
-          cp ~/binutils-gdb/gdb/gdb ./artifact/bin
+          cp gdb/gdb ./artifact/bin
           
       - name: Deliver buildinfo
         uses: actions/upload-artifact@v2
