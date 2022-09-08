@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: write # for release creation
 
-    name: Build OpenWrt firmware
+    name: GDB
 
     runs-on: ubuntu-latest
 
@@ -36,10 +36,10 @@ jobs:
           ./configure bpf
           make -j2
       
-      - name: Prepare artifact
+      - name: build
         run: |
           mkdir -p ./artifact/bin
-          cp /gdb/gdb ./artifact/bin
+          cp ~/binutils-gdb/gdb/gdb ./artifact/bin
           
       - name: Deliver buildinfo
         uses: actions/upload-artifact@v2
