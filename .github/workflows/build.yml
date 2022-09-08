@@ -38,6 +38,7 @@ jobs:
       
       - name: build
         run: |
+          pwd
           mkdir -p ./artifact/bin
           cp ~/binutils-gdb/gdb/gdb ./artifact/bin
           
