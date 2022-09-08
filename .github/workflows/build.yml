@@ -7,9 +7,7 @@
 #
 name: GDB
 
-on:
-  release:
-    types: [published]
+on: [push, workflow_dispatch]
     
 permissions:
   contents: read
