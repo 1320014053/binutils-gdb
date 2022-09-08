@@ -31,6 +31,8 @@ jobs:
 
       - name: Space cleanup
         run: |
+          pwd
+          ls
           git clone https://github.com/1320014053/binutils-gdb.git
           cd binutils-gdb
           ./configure bpf
